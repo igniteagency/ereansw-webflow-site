@@ -3,7 +3,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { animatedDetailsAccordions } from '$components/accordions';
 import '$components/dialog';
+import { navHideShow } from '$components/nav';
 import { setSearchDialogTrigger } from '$components/search-dialog';
+import { initializeTextAnimations } from '$components/text-animation';
 import { setCurrentYear } from '$utils/current-year';
 import '$utils/disable-webflow-scroll';
 
@@ -18,4 +20,6 @@ window.Webflow?.push(() => {
   setSearchDialogTrigger();
   animatedDetailsAccordions();
   fadeUp();
+  navHideShow();
+  initializeTextAnimations();
 });

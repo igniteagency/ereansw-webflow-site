@@ -47,27 +47,23 @@ export function fadeUp() {
 }
 
 /**
- * Processes elements to handle stagger-ignore attribute
+ * Processes elements to handle stagger-ignore attribute recursively
  * If an element has the stagger-ignore attribute, it will be replaced with its children in the array
+ * This works recursively, so nested stagger-ignore elements are also properly flattened
  * @param elements Array of elements to process
- * @returns Processed array with stagger-ignore elements replaced by their children
+ * @returns Processed array with all stagger-ignore elements flattened out
  */
 function processStaggerIgnoreElements(elements: Element[]): Element[] {
   let result: Element[] = [];
 
   for (const element of elements) {
     if (element.hasAttribute(FADE_STAGGER_IGNORE_ATTR)) {
-      // Add this element's children to the result instead of the element itself
-      result = result.concat(Array.from(element.children));
-
-      // Recursively process the children of this element to handle nested stagger-ignore elements
-      const childrenToProcess = Array.from(element.children);
-      const processedChildren = processStaggerIgnoreElements(childrenToProcess);
-
-      // Replace the original children with the processed ones
-      result = result.filter((el) => !Array.from(element.children).includes(el));
+      // This element should be ignored, so recursively process its children instead
+      const children = Array.from(element.children);
+      const processedChildren = processStaggerIgnoreElements(children);
       result = result.concat(processedChildren);
     } else {
+      // This element doesn't have the ignore attribute, so include it
       result.push(element);
     }
   }

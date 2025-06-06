@@ -53,19 +53,10 @@ function handleBackdropClick() {
   const dialogEl = document.querySelectorAll<HTMLDialogElement>('dialog');
   dialogEl.forEach((dialog) => {
     dialog.addEventListener('click', (event) => {
-      const dialogEl = event.target as HTMLDialogElement;
-      if (!(dialogEl instanceof HTMLDialogElement)) return;
-
-      // Check if click was directly on the dialog element (backdrop)
-      const rect = dialogEl.getBoundingClientRect();
-      const clickedInDialog =
-        rect.top <= event.clientY &&
-        event.clientY <= rect.top + rect.height &&
-        rect.left <= event.clientX &&
-        event.clientX <= rect.left + rect.width;
-
-      if (clickedInDialog && event.target === dialogEl) {
-        dialogEl.close();
+      // Check if the click was directly on the dialog element (backdrop)
+      // and not on any of its child elements
+      if (event.target === dialog) {
+        dialog.close();
       }
     });
   });
