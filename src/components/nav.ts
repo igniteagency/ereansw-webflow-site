@@ -4,6 +4,34 @@ const ANIMATION_DURATION: number = 0.5; // Duration in seconds
 const ANIMATION_EASE: string = 'power4.inOut'; // Easing function
 
 const SCROLL_DEBOUNCE_MS = 50;
+const BOX_SHADOW_OFFSET = 8; // Extra pixels to account for box shadow
+
+function updateNavbarHeightVar(isHidden: boolean = false) {
+  const navbar = document.querySelector('#navbar');
+  if (!navbar) return;
+
+  // Let browser recalc layout if needed
+  requestAnimationFrame(() => {
+    const fullNavbarHeight = navbar.offsetHeight;
+    const navbarComponentHeight = NAVBAR ? NAVBAR.offsetHeight : 0;
+
+    let targetHeight: number;
+    if (isHidden) {
+      // When hidden, subtract the navbar component height from the full navbar height
+      targetHeight = fullNavbarHeight - navbarComponentHeight;
+    } else {
+      // When visible, use the full navbar height
+      targetHeight = fullNavbarHeight;
+    }
+
+    // Animate the CSS variable with GSAP using the same properties as the navbar animation
+    window.gsap.to(document.documentElement, {
+      '--navbar-height': `${targetHeight}px`,
+      duration: ANIMATION_DURATION,
+      ease: ANIMATION_EASE,
+    });
+  });
+}
 
 export function navHideShow() {
   let lastScrollTop: number = 0;
@@ -17,20 +45,28 @@ export function navHideShow() {
     if (scrollDelta > 0) {
       if (scrollTimeout) clearTimeout(scrollTimeout);
       scrollTimeout = window.setTimeout(() => {
+        const navbar = document.querySelector('#navbar');
+        const fullNavbarHeight = navbar ? navbar.offsetHeight : 0;
+        const hideDistance = fullNavbarHeight + BOX_SHADOW_OFFSET;
+
         window.gsap.to(NAVBAR, {
-          yPercent: -180,
+          y: -hideDistance,
           duration: ANIMATION_DURATION,
           ease: ANIMATION_EASE,
         });
+        // Update CSS variable for hidden state
+        updateNavbarHeightVar(true);
       }, SCROLL_DEBOUNCE_MS);
     } else {
       // Scrolling up
       if (scrollTimeout) clearTimeout(scrollTimeout);
       window.gsap.to(NAVBAR, {
-        yPercent: 0,
+        y: 0,
         duration: ANIMATION_DURATION,
         ease: ANIMATION_EASE,
       });
+      // Update CSS variable for visible state
+      updateNavbarHeightVar(false);
     }
 
     // Check if the hero section is out of view and remove the .is-hero class if it exists
@@ -55,5 +91,39 @@ export function navHideShow() {
     // Debounce the scroll event handler
     if (scrollTimeout) clearTimeout(scrollTimeout);
     scrollTimeout = window.setTimeout(handleScroll, SCROLL_DEBOUNCE_MS);
+  });
+}
+
+export function initNavbarHeightVar() {
+  // Initial run (navbar starts visible)
+  updateNavbarHeightVar(false);
+
+  // On resize - maintain current state
+  window.addEventListener('resize', () => {
+    // Check if navbar is currently hidden by checking its transform
+    const currentTransform = window.getComputedStyle(NAVBAR).transform;
+    const isCurrentlyHidden =
+      currentTransform.includes('matrix') && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)';
+    updateNavbarHeightVar(isCurrentlyHidden);
+  });
+
+  // Listen for dialog open/close events in the navbar
+  const navbarDialogs = document.querySelectorAll('#navbar dialog');
+  navbarDialogs.forEach((dialog) => {
+    // Dialog opened - recalculate height
+    dialog.addEventListener('open', () => {
+      const currentTransform = window.getComputedStyle(NAVBAR).transform;
+      const isCurrentlyHidden =
+        currentTransform.includes('matrix') && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)';
+      updateNavbarHeightVar(isCurrentlyHidden);
+    });
+
+    // Dialog closed - recalculate height
+    dialog.addEventListener('close', () => {
+      const currentTransform = window.getComputedStyle(NAVBAR).transform;
+      const isCurrentlyHidden =
+        currentTransform.includes('matrix') && currentTransform !== 'matrix(1, 0, 0, 1, 0, 0)';
+      updateNavbarHeightVar(isCurrentlyHidden);
+    });
   });
 }
