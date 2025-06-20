@@ -54,6 +54,18 @@ declare global {
     querySelector<E extends HTMLElement = HTMLElement>(selectors: string): E | null;
     querySelectorAll<E extends HTMLElement = HTMLElement>(selectors: string): NodeListOf<E>;
   }
+
+  interface HTMLDetailsElement {
+    /**
+     * Open the accordion with an animated effect
+     */
+    openAnimated: () => void;
+
+    /**
+     * Close the accordion with an animated effect
+     */
+    closeAnimated: () => void;
+  }
 }
 
 export {};

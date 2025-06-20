@@ -1,5 +1,5 @@
-
 import { animatedDetailsAccordions } from '$components/accordions';
+import { accordionsAutoplay } from '$components/accordions-autoplay';
 import '$components/dialog';
 import { navHideShow } from '$components/nav';
 import { setSearchDialogTrigger } from '$components/search-dialog';
@@ -26,4 +26,5 @@ window.Webflow?.push(() => {
 
   fadeUp();
 
+  accordionsAutoplay();
 });
