@@ -1,5 +1,3 @@
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { animatedDetailsAccordions } from '$components/accordions';
 import '$components/dialog';
