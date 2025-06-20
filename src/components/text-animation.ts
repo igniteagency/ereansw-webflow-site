@@ -1,12 +1,3 @@
-// Type declarations for GSAP libraries
-declare global {
-  interface Window {
-    gsap: typeof import('gsap').gsap;
-    ScrollTrigger: typeof import('gsap/ScrollTrigger').ScrollTrigger;
-    SplitText: any; // SplitText doesn't have official types
-  }
-}
-
 interface SplitTextInstance {
   words: HTMLElement[];
   chars: HTMLElement[];
@@ -25,26 +16,6 @@ interface SplitTextConstructor {
     }
   ): SplitTextInstance;
 }
-
-/**
- * Initialize GSAP and register required plugins
- */
-export const initializeGSAP = (): void => {
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.gsap === 'undefined') {
-      document.documentElement.classList.add('gsap-not-found');
-      return;
-    }
-
-    // Register GSAP plugins
-    window.gsap.registerPlugin(window.ScrollTrigger);
-
-    // Note: SplitText needs to be registered if available
-    if (window.SplitText) {
-      window.gsap.registerPlugin(window.SplitText);
-    }
-  });
-};
 
 /**
  * Initialize word reveal animations for elements with data-word-reveal attribute
@@ -152,10 +123,6 @@ export const initializeLetterRevealAnimations = (): void => {
  * Initialize line reveal animations for elements with data-line-reveal attribute
  */
 export const initializeLineRevealAnimations = (): void => {
-  const { gsap } = window;
-  const { ScrollTrigger } = window;
-  const SplitText = window.SplitText as SplitTextConstructor;
-
   if (!gsap || !ScrollTrigger || !SplitText) {
     console.warn('GSAP, ScrollTrigger, or SplitText not available');
     return;
@@ -200,11 +167,12 @@ export const initializeLineRevealAnimations = (): void => {
 };
 
 /**
- * Initialize all text animations (word, letter, and line reveals)
+ * Initialize all text animations (word, letter, and line reveals) after fonts are loaded
  */
-export const initializeTextAnimations = (): void => {
-  initializeGSAP();
-  initializeWordRevealAnimations();
-  initializeLetterRevealAnimations();
-  initializeLineRevealAnimations();
+export const initializeTextAnimations = () => {
+  document.fonts.ready.then(() => {
+    initializeWordRevealAnimations();
+    initializeLetterRevealAnimations();
+    initializeLineRevealAnimations();
+  });
 };
