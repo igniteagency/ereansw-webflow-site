@@ -1,4 +1,5 @@
-const NAVBAR = document.querySelector('.navbar_component') as HTMLElement;
+const NAVBAR = document.querySelector('.navbar_component');
+const NAVBAR_HIDDEN_CLASS = 'is-hidden';
 const HERO_SECTION = document.getElementById('hero-section');
 const ANIMATION_DURATION: number = 0.5; // Duration in seconds
 const ANIMATION_EASE: string = 'power4.inOut'; // Easing function
@@ -54,6 +55,9 @@ export function navHideShow() {
           duration: ANIMATION_DURATION,
           ease: ANIMATION_EASE,
         });
+
+        NAVBAR?.classList.add(NAVBAR_HIDDEN_CLASS);
+
         // Update CSS variable for hidden state
         updateNavbarHeightVar(true);
       }, SCROLL_DEBOUNCE_MS);
@@ -65,6 +69,9 @@ export function navHideShow() {
         duration: ANIMATION_DURATION,
         ease: ANIMATION_EASE,
       });
+
+      NAVBAR?.classList.remove(NAVBAR_HIDDEN_CLASS);
+
       // Update CSS variable for visible state
       updateNavbarHeightVar(false);
     }
