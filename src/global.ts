@@ -4,6 +4,7 @@ import '$components/dialog';
 import { navHideShow } from '$components/nav';
 import { setSearchDialogTrigger } from '$components/search-dialog';
 import { initializeTextAnimations } from '$components/text-animation';
+import { initBugHerd } from '$utils/bugherd-script';
 import { setCurrentYear } from '$utils/current-year';
 import { disableWebflowAnchorSmoothScroll } from '$utils/disable-webflow-scroll';
 
@@ -29,4 +30,6 @@ window.Webflow?.push(() => {
   fadeUp();
 
   accordionsAutoplay();
+
+  initBugHerd();
 });
