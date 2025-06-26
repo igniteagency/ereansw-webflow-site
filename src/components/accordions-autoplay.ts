@@ -1,19 +1,24 @@
 const COMPONENT_SELECTOR = '[data-accordion-autoplay-el="component"]';
 const AUTOPLAY_TIMER_ATTR = 'data-accordion-autoplay-time-seconds';
-const ITEM_SELECTOR = '[data-accordion-autoplay-el="item"]';
+// const ITEM_SELECTOR = '[data-accordion-autoplay-el="item"]';
 
 const AUTOPLAY_DEFAULT_TIME_IN_SECONDS = 6;
 const AUTOPLAY_TIME_CSS_VAR = '--_autoplay-time';
 
 class AccordionAutoplay {
   private componentEl: HTMLElement;
-  private accordions: HTMLDetailsElement[];
-  private autoplayTime: number;
+  private accordions: HTMLDetailsElement[] = [];
+  private autoplayTime: number = AUTOPLAY_DEFAULT_TIME_IN_SECONDS;
   private currentIndex = -1;
   private autoplayInterval?: ReturnType<typeof setInterval>;
 
   constructor(element: HTMLElement) {
     this.componentEl = element;
+
+    // Only run autoplay if device has a fine pointer (e.g., mouse)
+    if (!window.matchMedia('(pointer: fine)').matches) {
+      return;
+    }
 
     const autoplayTimer = this.componentEl.getAttribute(AUTOPLAY_TIMER_ATTR);
     this.autoplayTime = autoplayTimer
