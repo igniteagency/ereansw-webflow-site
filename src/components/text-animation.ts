@@ -147,7 +147,7 @@ export const initializeLineRevealAnimations = (): void => {
       scrollTrigger: {
         trigger: text,
         start: 'top bottom',
-        end: 'top 80%',
+        end: 'top 85%',
         toggleActions: 'none play none reset',
       },
     });
