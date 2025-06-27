@@ -13,12 +13,14 @@ class AnimatedAccordion {
   private accordionToggleEl: HTMLElement;
   private accordionContentEl: HTMLElement;
   private accordionsList: NodeListOf<HTMLDetailsElement>;
+  private group: string | null;
 
   constructor(accordion: HTMLDetailsElement, accordionsList: NodeListOf<HTMLDetailsElement>) {
     this.accordion = accordion;
     this.accordionsList = accordionsList;
     this.accordionToggleEl = accordion.querySelector(TOGGLE_SELECTOR) as HTMLElement;
     this.accordionContentEl = accordion.querySelector(CONTENT_SELECTOR) as HTMLElement;
+    this.group = accordion.getAttribute('data-group');
 
     if (!this.accordionToggleEl || !this.accordionContentEl) {
       console.error(
@@ -53,8 +55,12 @@ class AnimatedAccordion {
 
     if (CLOSE_OTHER_ACCORDIONS) {
       this.accordionsList.forEach((otherAccordion) => {
-        if (otherAccordion !== this.accordion && otherAccordion.open) {
-          otherAccordion.closeAnimated?.();
+        if (
+          otherAccordion !== this.accordion &&
+          otherAccordion.open &&
+          otherAccordion.getAttribute('data-group') === this.group
+        ) {
+          otherAccordion.closeAnimated();
         }
       });
     }

@@ -1,6 +1,5 @@
 const COMPONENT_SELECTOR = '[data-accordion-autoplay-el="component"]';
 const AUTOPLAY_TIMER_ATTR = 'data-accordion-autoplay-time-seconds';
-// const ITEM_SELECTOR = '[data-accordion-autoplay-el="item"]';
 
 const AUTOPLAY_DEFAULT_TIME_IN_SECONDS = 6;
 const AUTOPLAY_TIME_CSS_VAR = '--_autoplay-time';
@@ -11,6 +10,8 @@ class AccordionAutoplay {
   private autoplayTime: number = AUTOPLAY_DEFAULT_TIME_IN_SECONDS;
   private currentIndex = -1;
   private autoplayInterval?: ReturnType<typeof setInterval>;
+  private intersectionObserver?: IntersectionObserver;
+  private isInView: boolean = false;
 
   constructor(element: HTMLElement) {
     this.componentEl = element;
@@ -36,7 +37,27 @@ class AccordionAutoplay {
     }
 
     this.addEventListeners();
-    this.startAutoplay();
+    this.setupIntersectionObserver();
+  }
+
+  private setupIntersectionObserver() {
+    this.intersectionObserver = new window.IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            this.isInView = true;
+            this.startAutoplay();
+          } else {
+            this.isInView = false;
+            this.stopAutoplay();
+          }
+        });
+      },
+      {
+        threshold: 0.2, // At least 20% in view to trigger
+      }
+    );
+    this.intersectionObserver.observe(this.componentEl);
   }
 
   private playNext = () => {
@@ -45,11 +66,19 @@ class AccordionAutoplay {
   };
 
   private startAutoplay = () => {
+    if (!this.isInView) return;
     if (this.autoplayInterval) {
       clearInterval(this.autoplayInterval);
     }
     this.playNext(); // Immediately play the first/next one
     this.autoplayInterval = setInterval(this.playNext, this.autoplayTime * 1000);
+  };
+
+  private stopAutoplay = () => {
+    if (this.autoplayInterval) {
+      clearInterval(this.autoplayInterval);
+      this.autoplayInterval = undefined;
+    }
   };
 
   private handleClick = (event: MouseEvent) => {
@@ -65,7 +94,10 @@ class AccordionAutoplay {
       if (this.autoplayInterval) {
         clearInterval(this.autoplayInterval);
       }
-      this.autoplayInterval = setInterval(this.playNext, this.autoplayTime * 1000);
+      // Only restart autoplay if in view
+      if (this.isInView) {
+        this.autoplayInterval = setInterval(this.playNext, this.autoplayTime * 1000);
+      }
     }
   };
 
