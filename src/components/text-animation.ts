@@ -140,25 +140,23 @@ export const initializeLineRevealAnimations = (): void => {
       type: 'lines',
       mask: 'lines',
       linesClass: 'line',
-    });
-
-    // Create timeline with scroll trigger
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: text,
-        start: 'top bottom',
-        end: 'top 85%',
-        toggleActions: 'none play none reset',
+      autoSplit: true,
+      onSplit(self) {
+        return gsap.from(self.lines, {
+          yPercent: 110,
+          delay: 0.3,
+          duration: 0.8,
+          ease: 'power4.out',
+          stagger: { amount: 0.1 },
+          scrollTrigger: {
+            trigger: text,
+            start: 'top bottom',
+            end: 'top 85%',
+            toggleActions: 'none play none reset',
+          },
+          onComplete: () => self.revert(),
+        });
       },
-    });
-
-    // Animate lines
-    tl.from(split.lines, {
-      yPercent: 110,
-      delay: 0.3,
-      duration: 0.8,
-      ease: 'power4.out',
-      stagger: { amount: 0.1 },
     });
 
     // Make text visible
