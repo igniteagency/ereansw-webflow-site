@@ -133,7 +133,7 @@ function renderDisplay(): void {
       svg.namespaceURI,
       'textPath'
     ) as SVGTextPathElement;
-    tp.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#textpath');
+    tp.setAttribute('href', '#textpath');
     tp.setAttribute('startOffset', '0');
     tp.textContent = name;
 
