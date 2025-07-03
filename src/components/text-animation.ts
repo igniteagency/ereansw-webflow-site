@@ -21,10 +21,6 @@ interface SplitTextConstructor {
  * Initialize word reveal animations for elements with data-word-reveal attribute
  */
 export const initializeWordRevealAnimations = (): void => {
-  const { gsap } = window;
-  const { ScrollTrigger } = window;
-  const SplitText = window.SplitText as SplitTextConstructor;
-
   if (!gsap || !ScrollTrigger || !SplitText) {
     console.warn('GSAP, ScrollTrigger, or SplitText not available');
     return;
@@ -43,6 +39,8 @@ export const initializeWordRevealAnimations = (): void => {
       mask: 'words',
       wordsClass: 'word',
       charsClass: 'char',
+      autoSplit: true,
+      aria: 'auto',
     });
 
     // Create timeline with scroll trigger
@@ -61,6 +59,7 @@ export const initializeWordRevealAnimations = (): void => {
       delay: 0.2,
       duration: 0.8,
       stagger: { amount: 0.5 },
+      onComplete: () => split.revert(),
     });
 
     // Make text visible
@@ -94,6 +93,8 @@ export const initializeLetterRevealAnimations = (): void => {
       mask: 'chars',
       wordsClass: 'word',
       charsClass: 'char',
+      autoSplit: true,
+      aria: 'auto',
     });
 
     // Create timeline with scroll trigger
@@ -112,6 +113,7 @@ export const initializeLetterRevealAnimations = (): void => {
       delay: 0.1,
       duration: 0.6,
       stagger: { amount: 0.8 },
+      onComplete: () => split.revert(),
     });
 
     // Make text visible
@@ -133,7 +135,8 @@ export const initializeLineRevealAnimations = (): void => {
 
   textElements.forEach((text: HTMLElement) => {
     // Use children if they exist (rich text), otherwise use the element itself (regular heading)
-    const targetElements = text.children.length > 0 ? Array.from(text.children) : [text];
+    // const targetElements = text.children.length > 0 ? Array.from(text.children) : [text];
+    const targetElements = [text];
 
     // Create split text instance for lines
     const split = SplitText.create(targetElements, {
@@ -141,6 +144,7 @@ export const initializeLineRevealAnimations = (): void => {
       mask: 'lines',
       linesClass: 'line',
       autoSplit: true,
+      aria: 'auto',
       onSplit(self) {
         return gsap.from(self.lines, {
           yPercent: 110,
