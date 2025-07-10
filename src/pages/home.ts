@@ -17,6 +17,7 @@ const alignOffsetPct: number = -0.0002; // small fraction to nudge active left
 const minFontPx: number = 12; // never smaller than 12 px
 const maxFontPx: number = 18; // never larger than 18 px
 const pxRatio: number = 0.02; // "preferred" = 2% of viewport width
+
 // ────────────────────────────────────────────────────────────────────
 
 const svg = document.getElementById('hero-svg') as SVGSVGElement | null;
@@ -109,13 +110,18 @@ function computeFontVB(): number {
 function renderDisplay(): void {
   if (!svg) throw new Error('SVG element not available');
 
+  group.style.textAnchor = '';
+
   // remove old <text> elements
   while (group.firstChild) {
     group.removeChild(group.firstChild);
   }
 
-  // compute font-size in VB units
+  // compute font-size in ViewBox units
   const fontVB: number = computeFontVB();
+  console.log('fontVB', fontVB);
+
+  group.style.fontSize = `${fontVB}px`;
 
   // recreate each <text> + <textPath>
   display.forEach((name: string, i: number) => {
@@ -124,8 +130,6 @@ function renderDisplay(): void {
       'text'
     ) as SVGTextElement;
     txt.setAttribute('class', 'hero-svg-text');
-    txt.setAttribute('font-size', fontVB.toString()); // VB units, no "px"
-    txt.setAttribute('text-anchor', 'middle');
     txt.style.cursor = 'pointer';
     txt.addEventListener('click', () => setActive(i));
 
@@ -141,34 +145,40 @@ function renderDisplay(): void {
     group.appendChild(txt);
   });
 
-  // measure each <text>'s length (in VB units)
-  const textElements = Array.from(group.querySelectorAll('text'));
-  texts = textElements as SVGTextElement[];
-  const widths: number[] = texts.map((t) => t.getComputedTextLength());
+  // Wait for fonts to be loaded, then measure and layout
+  document.fonts.ready.then(() => {
+    requestAnimationFrame(() => {
+      const textElements = Array.from(group.childNodes).filter(
+        (el): el is SVGTextElement => el instanceof SVGTextElement
+      );
+      texts = textElements;
+      const widths: number[] = texts.map((t) => t.getComputedTextLength());
 
-  // compute total span = sum(widths) + gaps
-  const totalW: number = widths.reduce((sum, w) => sum + w, 0);
-  const blockSpan: number = totalW + gap * (texts.length - 1);
+      const totalW: number = widths.reduce((sum, w) => sum + w, 0);
+      const blockSpan: number = totalW + gap * (texts.length - 1);
 
-  // centre that block at "start"
-  const blockStart: number = start - blockSpan / 2;
-  let cursor: number = blockStart;
+      const blockStart: number = start - blockSpan / 2;
+      let cursor: number = blockStart;
 
-  baseOffsets = [];
-  textPaths = [];
+      baseOffsets = [];
+      textPaths = [];
 
-  texts.forEach((txt: SVGTextElement, i: number) => {
-    cursor += widths[i] / 2;
-    const tp = txt.querySelector('textPath');
-    if (!tp) throw new Error('TextPath element not found');
+      texts.forEach((txt: SVGTextElement, i: number) => {
+        cursor += widths[i] / 2;
+        const tp = txt.querySelector('textPath') as SVGTextPathElement | null;
+        if (!tp) throw new Error('TextPath element not found');
 
-    const pos: number = (cursor + L) % L;
-    tp.setAttribute('startOffset', pos.toString());
+        const pos: number = (cursor + L) % L;
+        tp.setAttribute('startOffset', pos.toString());
 
-    baseOffsets.push(pos);
-    textPaths.push(tp as SVGTextPathElement);
+        baseOffsets.push(pos);
+        textPaths.push(tp);
 
-    cursor += widths[i] / 2 + gap;
+        cursor += widths[i] / 2 + gap;
+      });
+      console.log('SVG text widths:', widths);
+      group.style.textAnchor = 'middle';
+    });
   });
 }
 
@@ -259,7 +269,7 @@ function setActive(idx: number): void {
 }
 
 // Make setActive available globally
-(window as any).setActive = setActive;
+window.setActive = setActive;
 
 // ─── 8) RESPOND TO RESIZE ─────────────────────────────────────────────
 window.addEventListener('resize', (): void => {
