@@ -119,7 +119,7 @@ function renderDisplay(): void {
 
   // compute font-size in ViewBox units
   const fontVB: number = computeFontVB();
-  console.log('fontVB', fontVB);
+  if (window.IS_DEBUG_MODE) console.debug('fontVB', fontVB);
 
   group.style.fontSize = `${fontVB}px`;
 
@@ -176,7 +176,7 @@ function renderDisplay(): void {
 
         cursor += widths[i] / 2 + gap;
       });
-      console.log('SVG text widths:', widths);
+      if (window.IS_DEBUG_MODE) console.debug('SVG text widths:', widths);
       group.style.textAnchor = 'middle';
     });
   });
